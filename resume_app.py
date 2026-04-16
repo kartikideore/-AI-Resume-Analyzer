@@ -230,7 +230,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### What gets analyzed:")
     st.markdown("✓ Technical skills (role-specific)")
-    strat.markdown("✓ Resume sections")
+    st.markdown("✓ Resume sections")
     st.markdown("✓ Action verbs used")
     st.markdown("✓ Quantifiable achievements")
     st.markdown("✓ Soft skills")
