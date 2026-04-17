@@ -2,7 +2,6 @@ import streamlit as st
 import pdfplumber
 from docx import Document
 import re
-from collections import Counter
 
 st.set_page_config(page_title="AI Resume Analyzer", page_icon="🧠", layout="wide")
 
@@ -28,51 +27,85 @@ def extract_resume_text(uploaded_file):
         return extract_text_from_docx(uploaded_file)
     return ""
 
-# ========== ADVANCED RESUME ANALYSIS (Specific to each resume) ==========
+# ========== RESUME ANALYSIS FUNCTION ==========
 def analyze_specific_resume(resume_text, job_role):
     resume_lower = resume_text.lower()
     
-    # Role-specific keyword databases
+    # Complete keyword database for 25+ job roles
     role_keywords = {
-        "Software Engineer": ["python", "java", "javascript", "react", "angular", "vue", "node.js", "express", "django", "flask", "spring", "sql", "mongodb", "postgresql", "git", "github", "docker", "kubernetes", "aws", "azure", "gcp", "rest api", "graphql", "data structures", "algorithms", "oop", "design patterns", "testing", "jenkins", "ci/cd"],
+        # Tech Roles
+        "Software Engineer": ["python", "java", "javascript", "react", "angular", "vue", "node.js", "express", "django", "flask", "spring", "sql", "mongodb", "postgresql", "git", "docker", "kubernetes", "aws", "azure", "rest api", "data structures", "algorithms", "oop", "testing", "ci/cd"],
         
-        "Data Analyst": ["python", "r", "sql", "excel", "tableau", "power bi", "looker", "pandas", "numpy", "scikit-learn", "matplotlib", "seaborn", "statistics", "probability", "hypothesis testing", "regression", "data cleaning", "data visualization", "etl", "jupyter", "spreadsheets", "vba", "dashboard", "kpi", "business intelligence"],
+        "Data Analyst": ["python", "r", "sql", "excel", "tableau", "power bi", "pandas", "numpy", "statistics", "data visualization", "etl", "kpi", "data cleaning", "matplotlib", "seaborn", "dashboard"],
         
-        "Web Developer": ["html", "css", "javascript", "typescript", "react", "angular", "vue", "next.js", "node.js", "express", "php", "laravel", "ruby on rails", "mongodb", "mysql", "postgresql", "git", "responsive design", "bootstrap", "tailwind", "api", "rest", "graphql", "wordpress", "hosting", "deployment"],
+        "Web Developer": ["html", "css", "javascript", "typescript", "react", "angular", "vue", "next.js", "node.js", "express", "mongodb", "mysql", "git", "responsive design", "bootstrap", "tailwind", "api", "rest"],
         
-        "Data Scientist": ["python", "r", "sql", "tensorflow", "pytorch", "keras", "scikit-learn", "pandas", "numpy", "machine learning", "deep learning", "nlp", "computer vision", "statistics", "linear algebra", "calculus", "data mining", "big data", "spark", "hadoop", "cloud computing"],
+        "Data Scientist": ["python", "r", "sql", "tensorflow", "pytorch", "scikit-learn", "pandas", "numpy", "machine learning", "deep learning", "nlp", "statistics", "data mining", "big data", "spark"],
         
-        "DevOps Engineer": ["linux", "bash", "python", "docker", "kubernetes", "jenkins", "gitlab ci", "github actions", "aws", "azure", "gcp", "terraform", "ansible", "prometheus", "grafana", "elk stack", "nginx", "apache", "monitoring", "logging", "iac"],
+        "DevOps Engineer": ["linux", "bash", "python", "docker", "kubernetes", "jenkins", "gitlab", "aws", "azure", "terraform", "ansible", "prometheus", "grafana", "monitoring", "ci/cd"],
         
-        "Project Manager": ["agile", "scrum", "kanban", "jira", "confluence", "trello", "ms project", "leadership", "team management", "stakeholder management", "risk management", "budgeting", "scheduling", "waterfall", "pmp", "prince2", "communication", "negotiation", "reporting"]
+        "Frontend Developer": ["html", "css", "javascript", "typescript", "react", "vue", "angular", "tailwind", "bootstrap", "git", "responsive design", "next.js", "figma"],
+        
+        "Backend Developer": ["python", "java", "node.js", "sql", "mongodb", "api", "rest", "graphql", "spring", "django", "flask", "git", "microservices", "redis"],
+        
+        "Full Stack Developer": ["javascript", "react", "node.js", "python", "sql", "mongodb", "html", "css", "git", "api", "express", "typescript", "aws"],
+        
+        "Cloud Engineer": ["aws", "azure", "gcp", "docker", "kubernetes", "terraform", "linux", "python", "ci/cd", "serverless", "lambda", "ec2", "s3"],
+        
+        "Machine Learning Engineer": ["python", "tensorflow", "pytorch", "scikit-learn", "machine learning", "deep learning", "sql", "pandas", "numpy", "aws", "mlops", "docker"],
+        
+        "AI Engineer": ["python", "tensorflow", "pytorch", "machine learning", "deep learning", "nlp", "llm", "openai", "langchain", "rag", "vector databases"],
+        
+        # Management Roles
+        "Product Manager": ["agile", "scrum", "jira", "product strategy", "user stories", "roadmap", "stakeholder management", "analytics", "market research", "kpi"],
+        
+        "Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "budgeting", "leadership", "communication", "pmp", "waterfall"],
+        
+        "Technical Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "python", "sql", "git", "stakeholder management", "technical documentation"],
+        
+        # Marketing & Sales Roles
+        "Digital Marketing Manager": ["seo", "sem", "google analytics", "social media", "content marketing", "email marketing", "ppc", "marketing strategy", "facebook ads", "google ads"],
+        
+        "Social Media Manager": ["instagram", "facebook", "twitter", "linkedin", "content creation", "social media strategy", "analytics", "canva", "engagement"],
+        
+        "Sales Executive": ["sales", "negotiation", "crm", "lead generation", "business development", "communication", "salesforce", "cold calling", "account management"],
+        
+        # HR & Finance Roles
+        "HR Generalist": ["recruitment", "onboarding", "employee relations", "hr policies", "performance management", "training", "hrms", "labor laws", "benefits administration"],
+        
+        "Financial Analyst": ["excel", "financial modeling", "accounting", "budgeting", "forecasting", "vba", "sql", "tableau", "financial reporting", "variance analysis"],
+        
+        "Business Analyst": ["requirements gathering", "agile", "scrum", "jira", "sql", "data analysis", "use cases", "stakeholder management", "documentation", "brd"],
+        
+        # Design Roles
+        "Graphic Designer": ["photoshop", "illustrator", "indesign", "figma", "sketch", "adobe creative suite", "typography", "color theory", "branding", "logo design"],
+        
+        "UX/UI Designer": ["figma", "adobe xd", "sketch", "prototyping", "user research", "wireframing", "usability testing", "html", "css", "responsive design"],
+        
+        "Product Designer": ["figma", "prototyping", "user research", "wireframing", "ui design", "ux design", "design systems", "visual design", "interaction design"],
+        
+        # Security Roles
+        "Cybersecurity Analyst": ["network security", "firewalls", "penetration testing", "risk assessment", "compliance", "siem", "incident response", "python", "linux", "vulnerability assessment"],
+        
+        "Security Engineer": ["python", "linux", "network security", "penetration testing", "cloud security", "aws security", "incident response", "cryptography", "authentication"]
     }
     
-    # Get keywords for selected role
+    # Get keywords for selected role (default to Software Engineer if not found)
     keywords = role_keywords.get(job_role, role_keywords["Software Engineer"])
     
-    # === SPECIFIC ANALYSIS OF THIS RESUME ===
+    # Find present and missing skills
+    found_skills = [skill for skill in keywords if skill in resume_lower]
+    missing_skills = [skill for skill in keywords if skill not in resume_lower]
     
-    # 1. Find which skills are present (from the keyword list)
-    found_skills = []
-    missing_skills = []
-    
-    for skill in keywords:
-        if skill in resume_lower:
-            found_skills.append(skill)
-        else:
-            missing_skills.append(skill)
-    
-    # 2. Detect sections (look for common section headers)
+    # Section detection
     sections_detected = []
     section_patterns = {
-        "experience": ["experience", "work experience", "employment", "work history", "professional experience"],
-        "education": ["education", "academic background", "degrees", "university", "college", "school"],
-        "skills": ["skills", "technical skills", "core competencies", "expertise"],
-        "projects": ["projects", "personal projects", "side projects", "portfolio"],
+        "experience": ["experience", "work experience", "employment", "work history"],
+        "education": ["education", "academic", "university", "college", "school"],
+        "skills": ["skills", "technical skills", "core competencies"],
+        "projects": ["projects", "personal projects", "portfolio"],
         "certifications": ["certifications", "certificates", "courses"],
-        "achievements": ["achievements", "awards", "honors", "recognition"],
-        "languages": ["languages", "language proficiency"],
-        "volunteering": ["volunteer", "volunteering", "community"]
+        "achievements": ["achievements", "awards", "honors"]
     }
     
     for section, patterns in section_patterns.items():
@@ -80,65 +113,36 @@ def analyze_specific_resume(resume_text, job_role):
             if pattern in resume_lower:
                 sections_detected.append(section)
                 break
-    
     sections_detected = list(set(sections_detected))
     
-    # 3. Check for action verbs (shows strong writing)
-    action_verbs = ["developed", "built", "created", "designed", "implemented", "managed", "led", "improved", "increased", "decreased", "reduced", "achieved", "delivered", "launched", "optimized", "automated", "integrated", "collaborated", "mentored", "trained", "spearheaded", "architected", "refactored", "debugged", "tested", "deployed"]
-    
+    # Action verbs detection
+    action_verbs = ["developed", "built", "created", "designed", "implemented", "managed", "led", "improved", "increased", "decreased", "achieved", "delivered", "launched", "optimized", "automated"]
     found_action_verbs = [verb for verb in action_verbs if verb in resume_lower]
     
-    # 4. Check for metrics/numbers (shows impact)
-    numbers = re.findall(r'\d+%|\d+\s*percent|\d+\s*days|\d+\s*hours|\$\d+|\d+\s*people|\d+\s*team', resume_text)
+    # Metrics detection
+    numbers = re.findall(r'\d+%|\$\d+|\d+\s*percent', resume_text)
     
-    # 5. Check for soft skills
-    soft_skills = ["communication", "teamwork", "problem solving", "leadership", "time management", "critical thinking", "creativity", "adaptability", "collaboration", "organization"]
+    # Soft skills detection
+    soft_skills = ["communication", "teamwork", "problem solving", "leadership", "time management", "critical thinking", "creativity", "adaptability", "collaboration"]
     found_soft_skills = [skill for skill in soft_skills if skill in resume_lower]
     
-    # 6. Check for contact information
+    # Contact info detection
     has_email = bool(re.search(r'[\w\.-]+@[\w\.-]+\.\w+', resume_text))
     has_phone = bool(re.search(r'\+?\d[\d\s\-\(\)]{8,}\d', resume_text))
-    has_linkedin = "linkedin.com/in/" in resume_lower or "linkedin.com/pub/" in resume_lower
+    has_linkedin = "linkedin.com/in/" in resume_lower
     
-    # 7. Check for formatting issues
-    formatting_issues = []
-    if len(resume_text.split()) < 200:
-        formatting_issues.append("Very short resume - may lack detail")
-    if "table" in resume_lower:
-        formatting_issues.append("Tables detected - may cause ATS issues")
-    if resume_text.count('\t') > 10:
-        formatting_issues.append("Multiple tabs - use single column format")
-    
-    # === SCORING (Based on actual content) ===
-    
-    # Skills score (40 points)
+    # Scoring
     skill_score = min(40, int((len(found_skills) / max(len(keywords), 1)) * 40))
-    
-    # Sections score (20 points)
     expected_sections = ["experience", "education", "skills", "projects"]
     section_score = min(20, int((len([s for s in expected_sections if s in sections_detected]) / 4) * 20))
-    
-    # Action verbs score (15 points)
     verb_score = min(15, len(found_action_verbs))
-    
-    # Metrics score (10 points)
     metric_score = min(10, len(numbers))
-    
-    # Soft skills score (5 points)
     soft_skill_score = min(5, len(found_soft_skills))
-    
-    # Contact info score (10 points)
-    contact_score = 0
-    if has_email:
-        contact_score += 4
-    if has_phone:
-        contact_score += 3
-    if has_linkedin:
-        contact_score += 3
+    contact_score = (4 if has_email else 0) + (3 if has_phone else 0) + (3 if has_linkedin else 0)
     
     total_score = min(100, skill_score + section_score + verb_score + metric_score + soft_skill_score + contact_score)
     
-    # Grade based on actual score
+    # Grade
     if total_score >= 85:
         grade = "Outstanding! 🎉 Ready for top companies"
     elif total_score >= 70:
@@ -150,47 +154,37 @@ def analyze_specific_resume(resume_text, job_role):
     else:
         grade = "Poor ❌ Complete overhaul recommended"
     
-    # === GENERATE SPECIFIC FEEDBACK ===
+    # Generate feedback
     strengths = []
     improvements = []
     
-    # Strengths based on actual content
     if skill_score >= 30:
-        strengths.append(f"✅ Strong technical skills ({len(found_skills)} relevant skills found)")
+        strengths.append(f"✅ Strong technical skills ({len(found_skills)} relevant skills)")
     if section_score >= 15:
         strengths.append(f"✅ Good section coverage ({', '.join(sections_detected[:3])})")
     if len(found_action_verbs) >= 5:
-        strengths.append(f"✅ Excellent use of action verbs ({len(found_action_verbs)} examples)")
+        strengths.append(f"✅ Excellent action verbs ({len(found_action_verbs)} examples)")
     if len(numbers) >= 3:
-        strengths.append(f"✅ Good use of metrics/numbers ({len(numbers)} quantifiable achievements)")
+        strengths.append(f"✅ Good use of metrics ({len(numbers)} achievements)")
     if has_linkedin:
         strengths.append("✅ LinkedIn profile included")
-    if len(found_soft_skills) >= 3:
-        strengths.append(f"✅ Shows soft skills: {', '.join(found_soft_skills[:3])}")
     
-    # Improvements based on missing content
     if skill_score < 25:
-        improvements.append(f"❌ Add more technical skills. Found {len(found_skills)} out of {len(keywords)} expected")
+        improvements.append(f"❌ Add more technical skills. Found {len(found_skills)} out of {len(keywords)}")
     if "experience" not in sections_detected:
-        improvements.append("❌ Missing 'Experience' section - crucial for recruiters")
+        improvements.append("❌ Missing 'Experience' section")
     if "projects" not in sections_detected:
-        improvements.append("❌ Add a 'Projects' section to showcase practical work")
+        improvements.append("❌ Add a 'Projects' section")
     if len(found_action_verbs) < 3:
-        improvements.append("❌ Use stronger action verbs (e.g., 'Developed', 'Led', 'Optimized')")
+        improvements.append("❌ Use stronger action verbs (Developed, Led, Built)")
     if len(numbers) == 0:
         improvements.append("❌ Add quantifiable achievements (e.g., 'Increased sales by 30%')")
     if not has_phone:
-        improvements.append("❌ Missing phone number - recruiters need to contact you")
+        improvements.append("❌ Missing phone number")
     if not has_linkedin:
-        improvements.append("📎 Add LinkedIn profile link for professional presence")
-    if len(missing_skills) > 10:
+        improvements.append("📎 Add LinkedIn profile link")
+    if missing_skills:
         improvements.append(f"🎯 Missing key skills: {', '.join(missing_skills[:5])}")
-    
-    # Ensure we have at least 3 suggestions
-    if len(improvements) < 3:
-        improvements.append("📊 Add metrics to show impact (numbers, percentages, $ amounts)")
-        improvements.append("🔧 Tailor resume specifically for this job role")
-        improvements.append("📝 Add a professional summary at the top")
     
     return {
         'score': total_score,
@@ -204,29 +198,60 @@ def analyze_specific_resume(resume_text, job_role):
         'has_email': has_email,
         'has_phone': has_phone,
         'has_linkedin': has_linkedin,
-        'formatting_issues': formatting_issues,
         'strengths': strengths,
-        'improvements': improvements,
+        'improvements': improvements[:8],
         'skill_score': skill_score,
         'section_score': section_score,
         'verb_score': verb_score,
         'metric_score': metric_score,
         'soft_skill_score': soft_skill_score,
         'contact_score': contact_score,
-        'word_count': len(resume_text.split())
+        'word_count': len(resume_text.split()),
+        'total_keywords': len(keywords)
     }
 
-# ========== MAIN APP ==========
+# ========== MAIN APP UI ==========
 st.title("🧠 AI Resume Analyzer")
 st.markdown("*Real analysis of YOUR specific resume - not generic templates*")
 
-# Sidebar
 with st.sidebar:
     st.header("⚙️ Settings")
-    job_role = st.selectbox(
-        "Target Job Role:",
-        ["Software Engineer", "Data Analyst", "Web Developer", "Data Scientist", "DevOps Engineer", "Project Manager"]
-    )
+    
+    # FULL dropdown with all 25+ roles
+    job_role = st.selectbox("Select Target Job Role:", [
+        "━━━━━ 👨‍💻 TECH ROLES ━━━━━",
+        "Software Engineer", 
+        "Data Analyst", 
+        "Web Developer",
+        "Data Scientist",
+        "DevOps Engineer",
+        "Frontend Developer",
+        "Backend Developer",
+        "Full Stack Developer",
+        "Cloud Engineer",
+        "Machine Learning Engineer",
+        "AI Engineer",
+        "━━━━━ 📊 MANAGEMENT ━━━━━",
+        "Product Manager",
+        "Project Manager",
+        "Technical Project Manager",
+        "━━━━━ 📈 MARKETING & SALES ━━━━━",
+        "Digital Marketing Manager",
+        "Social Media Manager",
+        "Sales Executive",
+        "━━━━━ 👥 HR & FINANCE ━━━━━",
+        "HR Generalist",
+        "Financial Analyst",
+        "Business Analyst",
+        "━━━━━ 🎨 DESIGN ━━━━━",
+        "Graphic Designer",
+        "UX/UI Designer",
+        "Product Designer",
+        "━━━━━ 🔒 SECURITY ━━━━━",
+        "Cybersecurity Analyst",
+        "Security Engineer"
+    ])
+    
     st.markdown("---")
     st.markdown("### What gets analyzed:")
     st.markdown("✓ Technical skills (role-specific)")
@@ -235,7 +260,6 @@ with st.sidebar:
     st.markdown("✓ Quantifiable achievements")
     st.markdown("✓ Soft skills")
     st.markdown("✓ Contact information")
-    st.markdown("✓ ATS compatibility")
 
 # Upload area
 uploaded_file = st.file_uploader(
@@ -249,158 +273,86 @@ if uploaded_file is not None:
         resume_text = extract_resume_text(uploaded_file)
         
         if resume_text and len(resume_text) > 100:
-            # Analyze this specific resume
             analysis = analyze_specific_resume(resume_text, job_role)
             
-            # Show file info
-            st.info(f"📄 Analyzing: **{uploaded_file.name}** | Words: {analysis['word_count']} | Sections found: {len(analysis['sections_detected'])}")
+            st.info(f"📄 Analyzing: **{uploaded_file.name}** | Words: {analysis['word_count']} | Sections: {len(analysis['sections_detected'])}")
             
-            # Main score display
+            # Score display
             col1, col2, col3 = st.columns([2, 1, 1])
-            
             with col1:
-                st.markdown(f"## 🎯 Overall Score: **{analysis['score']}/100**")
+                st.markdown(f"## 🎯 Score: **{analysis['score']}/100**")
                 st.markdown(f"### {analysis['grade']}")
                 st.progress(analysis['score'] / 100)
-            
             with col2:
-                st.metric("Technical Skills", f"{len(analysis['found_skills'])}/{len(analysis['found_skills']) + len(analysis['missing_skills'])}")
-            
+                st.metric("Skills Match", f"{len(analysis['found_skills'])}/{analysis['total_keywords']}")
             with col3:
-                st.metric("Sections Found", f"{len(analysis['sections_detected'])}/8")
+                st.metric("Sections Found", f"{len(analysis['sections_detected'])}/6")
             
             st.markdown("---")
             
             # Score breakdown
-            st.subheader("📊 Score Breakdown (Specific to Your Resume)")
-            
-            col1, col2, col3, col4, col5, col6 = st.columns(6)
-            with col1:
-                st.metric("Skills", f"{analysis['skill_score']}/40")
-            with col2:
-                st.metric("Sections", f"{analysis['section_score']}/20")
-            with col3:
-                st.metric("Action Verbs", f"{analysis['verb_score']}/15")
-            with col4:
-                st.metric("Metrics", f"{analysis['metric_score']}/10")
-            with col5:
-                st.metric("Soft Skills", f"{analysis['soft_skill_score']}/5")
-            with col6:
-                st.metric("Contact", f"{analysis['contact_score']}/10")
+            st.subheader("📊 Score Breakdown")
+            cols = st.columns(6)
+            cols[0].metric("Skills", f"{analysis['skill_score']}/40")
+            cols[1].metric("Sections", f"{analysis['section_score']}/20")
+            cols[2].metric("Action Verbs", f"{analysis['verb_score']}/15")
+            cols[3].metric("Metrics", f"{analysis['metric_score']}/10")
+            cols[4].metric("Soft Skills", f"{analysis['soft_skill_score']}/5")
+            cols[5].metric("Contact", f"{analysis['contact_score']}/10")
             
             st.markdown("---")
             
-            # Two columns for strengths and improvements
+            # Strengths and Improvements
             col1, col2 = st.columns(2)
-            
             with col1:
-                st.subheader("✅ What's Working Well")
-                if analysis['strengths']:
-                    for strength in analysis['strengths']:
-                        st.success(strength)
-                else:
-                    st.info("No major strengths detected yet - focus on improvements below")
+                st.subheader("✅ Strengths")
+                for s in analysis['strengths']:
+                    st.success(s)
+                if not analysis['strengths']:
+                    st.info("Focus on improvements below")
             
             with col2:
-                st.subheader("❌ Areas to Improve")
-                for improvement in analysis['improvements'][:6]:
-                    st.error(improvement)
+                st.subheader("❌ Improvements")
+                for i in analysis['improvements']:
+                    st.error(i)
             
-            st.markdown("---")
-            
-            # Detailed analysis sections
-            with st.expander("🔍 View Detailed Analysis", expanded=True):
-                # Skills section
-                st.subheader("🛠️ Technical Skills Analysis")
+            # Detailed analysis expander
+            with st.expander("🔍 View Detailed Analysis"):
                 if analysis['found_skills']:
-                    st.write(f"**Found ({len(analysis['found_skills'])} skills):**")
-                    cols = st.columns(4)
-                    for i, skill in enumerate(analysis['found_skills'][:20]):
-                        cols[i % 4].markdown(f"✓ `{skill}`")
-                else:
-                    st.warning("No technical skills detected! Add a 'Skills' section.")
+                    st.subheader("Skills Found")
+                    st.write(", ".join(analysis['found_skills'][:15]))
                 
                 if analysis['missing_skills']:
-                    st.write(f"**Missing ({len(analysis['missing_skills'])} skills):**")
-                    cols = st.columns(4)
-                    for i, skill in enumerate(analysis['missing_skills'][:12]):
-                        cols[i % 4].markdown(f"✗ `{skill}`")
+                    st.subheader("Missing Skills")
+                    st.write(", ".join(analysis['missing_skills'][:10]))
                 
-                st.markdown("---")
+                st.subheader("Sections Found")
+                st.write(", ".join(analysis['sections_detected']) if analysis['sections_detected'] else "None detected")
                 
-                # Sections found
-                st.subheader("📑 Resume Sections Detected")
-                if analysis['sections_detected']:
-                    for section in analysis['sections_detected']:
-                        st.write(f"✓ {section.title()}")
-                else:
-                    st.warning("No clear sections detected. Use headers like 'Experience', 'Education', 'Skills'")
+                st.subheader("Action Verbs Found")
+                st.write(", ".join(analysis['found_action_verbs'][:10]) if analysis['found_action_verbs'] else "None")
                 
-                # Action verbs
-                st.subheader("💪 Action Verbs Used")
-                if analysis['found_action_verbs']:
-                    st.write(f"Found {len(analysis['found_action_verbs'])} strong action verbs:")
-                    st.write(", ".join(analysis['found_action_verbs'][:10]))
-                else:
-                    st.warning("No strong action verbs detected. Start bullet points with verbs like 'Developed', 'Led', 'Created'")
-                
-                # Metrics
-                st.subheader("📊 Quantifiable Achievements")
-                if analysis['numbers_found'] > 0:
-                    st.success(f"Found {analysis['numbers_found']} numbers/metrics - Great for showing impact!")
-                else:
-                    st.warning("No numbers or metrics detected. Add percentages, dollar amounts, or time frames to show achievements")
-                
-                # Soft skills
-                st.subheader("🤝 Soft Skills")
-                if analysis['found_soft_skills']:
-                    st.write(f"Found: {', '.join(analysis['found_soft_skills'])}")
-                else:
-                    st.info("Add soft skills like 'Communication', 'Leadership', 'Problem Solving'")
-                
-                # Contact info
-                st.subheader("📞 Contact Information")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.write("✓ Email" if analysis['has_email'] else "✗ Missing email")
-                with col2:
-                    st.write("✓ Phone" if analysis['has_phone'] else "✗ Missing phone")
-                with col3:
-                    st.write("✓ LinkedIn" if analysis['has_linkedin'] else "📎 Add LinkedIn")
-                
-                # Formatting issues
-                if analysis['formatting_issues']:
-                    st.subheader("⚠️ Formatting Issues")
-                    for issue in analysis['formatting_issues']:
-                        st.warning(issue)
+                st.subheader("Contact Info")
+                st.write(f"Email: {'✓' if analysis['has_email'] else '✗'}")
+                st.write(f"Phone: {'✓' if analysis['has_phone'] else '✗'}")
+                st.write(f"LinkedIn: {'✓' if analysis['has_linkedin'] else '✗'}")
             
-            # ATS Tips
-            st.markdown("---")
-            st.subheader("🤖 ATS Optimization Tips")
-            tips = [
-                "Use standard section headers (Experience, Education, Skills)",
-                "Avoid tables, columns, and images",
-                "Include keywords from the job description",
-                "Save as PDF (not DOCX) for best compatibility",
-                "Use a simple, clean format without fancy graphics"
-            ]
-            for tip in tips:
-                st.info(tip)
-            
-            # Download report option
+            # Download report
             report = f"""
-            RESUME ANALYSIS REPORT
-            =======================
+            ========================================
+            AI RESUME ANALYZER - FULL REPORT
+            ========================================
+            
             File: {uploaded_file.name}
             Target Role: {job_role}
-            Overall Score: {analysis['score']}/100
+            Score: {analysis['score']}/100
             Grade: {analysis['grade']}
             
             SCORE BREAKDOWN:
             - Technical Skills: {analysis['skill_score']}/40
             - Resume Sections: {analysis['section_score']}/20
             - Action Verbs: {analysis['verb_score']}/15
-            - Metrics/Impact: {analysis['metric_score']}/10
+            - Metrics: {analysis['metric_score']}/10
             - Soft Skills: {analysis['soft_skill_score']}/5
             - Contact Info: {analysis['contact_score']}/10
             
@@ -410,41 +362,24 @@ if uploaded_file is not None:
             IMPROVEMENTS NEEDED:
             {chr(10).join(analysis['improvements'])}
             
-            MISSING SKILLS FOR {job_role.upper()}:
+            MISSING SKILLS:
             {', '.join(analysis['missing_skills'][:10])}
+            
+            ========================================
             """
-            
-            st.download_button(
-                label="📥 Download Full Report",
-                data=report,
-                file_name="resume_analysis_report.txt",
-                mime="text/plain"
-            )
-            
+            st.download_button("📥 Download Report", report, "resume_report.txt", "text/plain")
         else:
-            st.error("Could not extract enough text. Make sure your resume is not an image/scanned PDF. Use a text-based PDF or DOCX.")
+            st.error("Could not extract text. Make sure your resume is not an image/scanned PDF.")
 else:
-    # Show demo when no file uploaded
-    st.info("👆 **Upload YOUR resume above** to get a personalized analysis")
+    st.info("👆 **Upload your resume to get started!**")
     
-    with st.expander("📖 See how it works (example)"):
+    with st.expander("📖 How it works"):
         st.markdown("""
-        **When you upload a resume, this tool will:**
-        
-        1. **Extract the actual text** from YOUR specific file
-        2. **Count technical skills** that are actually present
-        3. **Detect which sections** exist in YOUR resume
-        4. **Find action verbs** YOU used
-        5. **Identify metrics** in YOUR achievements
-        6. **Generate UNIQUE feedback** based only on YOUR content
-        
-        **Example:**
-        - If your resume has "Python, SQL, React" → you'll see those skills
-        - If your resume lacks "Projects" section → you'll be told to add it
-        - If your resume has numbers like "increased sales 30%" → you'll get credit
-        
-        **No two analyses are the same** - each result is unique to the uploaded resume!
+        1. Upload your resume (PDF or DOCX)
+        2. Select your target job role
+        3. Get instant score and analysis
+        4. Download detailed report
         """)
 
 st.markdown("---")
-st.caption("💡 Real analysis of YOUR specific resume. Works with any PDF/DOCX resume file.")
+st.caption("AI Resume Analyzer | Analyze, Optimize, Succeed 🚀")
