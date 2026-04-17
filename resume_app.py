@@ -31,66 +31,107 @@ def extract_resume_text(uploaded_file):
 def analyze_specific_resume(resume_text, job_role):
     resume_lower = resume_text.lower()
     
-    # Complete keyword database for 25+ job roles
+    # ===== COMPLETE KEYWORD DATABASE - 50+ JOB ROLES =====
     role_keywords = {
-        # Tech Roles
-        "Software Engineer": ["python", "java", "javascript", "react", "angular", "vue", "node.js", "express", "django", "flask", "spring", "sql", "mongodb", "postgresql", "git", "docker", "kubernetes", "aws", "azure", "rest api", "data structures", "algorithms", "oop", "testing", "ci/cd"],
-        
-        "Data Analyst": ["python", "r", "sql", "excel", "tableau", "power bi", "pandas", "numpy", "statistics", "data visualization", "etl", "kpi", "data cleaning", "matplotlib", "seaborn", "dashboard"],
-        
-        "Web Developer": ["html", "css", "javascript", "typescript", "react", "angular", "vue", "next.js", "node.js", "express", "mongodb", "mysql", "git", "responsive design", "bootstrap", "tailwind", "api", "rest"],
-        
-        "Data Scientist": ["python", "r", "sql", "tensorflow", "pytorch", "scikit-learn", "pandas", "numpy", "machine learning", "deep learning", "nlp", "statistics", "data mining", "big data", "spark"],
-        
-        "DevOps Engineer": ["linux", "bash", "python", "docker", "kubernetes", "jenkins", "gitlab", "aws", "azure", "terraform", "ansible", "prometheus", "grafana", "monitoring", "ci/cd"],
-        
+        # 👨‍💻 SOFTWARE DEVELOPMENT (10 roles)
+        "Software Engineer": ["python", "java", "javascript", "react", "sql", "git", "docker", "aws", "data structures", "algorithms", "spring", "node.js", "c++", "microservices", "rest api"],
         "Frontend Developer": ["html", "css", "javascript", "typescript", "react", "vue", "angular", "tailwind", "bootstrap", "git", "responsive design", "next.js", "figma"],
+        "Backend Developer": ["python", "java", "node.js", "sql", "mongodb", "api", "rest", "graphql", "spring", "django", "flask", "git", "microservices", "redis", "kafka"],
+        "Full Stack Developer": ["javascript", "react", "node.js", "python", "sql", "mongodb", "html", "css", "git", "api", "express", "typescript", "aws", "docker"],
+        "Mobile Developer": ["swift", "kotlin", "java", "react native", "flutter", "ios", "android", "xcode", "android studio", "firebase", "rest api", "ui design"],
+        "Game Developer": ["unity", "unreal engine", "c#", "c++", "3d modeling", "animation", "physics", "game design", "opengl", "directx", "shaders"],
+        "Embedded Engineer": ["c", "c++", "embedded systems", "microcontrollers", "arduino", "raspberry pi", "iot", "firmware", "rtos", "circuit design", "debugging"],
+        "DevOps Engineer": ["linux", "bash", "python", "docker", "kubernetes", "jenkins", "gitlab", "aws", "azure", "terraform", "ansible", "prometheus", "grafana", "ci/cd"],
+        "Site Reliability Engineer": ["linux", "python", "go", "kubernetes", "docker", "aws", "monitoring", "prometheus", "grafana", "incident response", "scalability", "automation"],
+        "Quality Assurance Engineer": ["manual testing", "automation testing", "selenium", "junit", "pytest", "test cases", "bug tracking", "jira", "api testing", "performance testing"],
         
-        "Backend Developer": ["python", "java", "node.js", "sql", "mongodb", "api", "rest", "graphql", "spring", "django", "flask", "git", "microservices", "redis"],
+        # 📊 DATA & AI (8 roles)
+        "Data Analyst": ["python", "sql", "excel", "tableau", "power bi", "pandas", "numpy", "statistics", "data visualization", "etl", "kpi", "data cleaning", "matplotlib", "seaborn"],
+        "Data Scientist": ["python", "r", "sql", "tensorflow", "pytorch", "scikit-learn", "pandas", "numpy", "machine learning", "deep learning", "nlp", "statistics", "data mining", "big data"],
+        "Machine Learning Engineer": ["python", "tensorflow", "pytorch", "scikit-learn", "machine learning", "deep learning", "sql", "pandas", "numpy", "aws", "mlops", "docker", "kubernetes"],
+        "AI Engineer": ["python", "tensorflow", "pytorch", "machine learning", "deep learning", "nlp", "llm", "openai", "langchain", "rag", "vector databases", "pinecone", "chromadb"],
+        "Data Engineer": ["python", "sql", "spark", "hadoop", "airflow", "etl", "data warehouse", "aws", "azure", "big data", "kafka", "pipeline", "dbt"],
+        "Business Intelligence Analyst": ["sql", "tableau", "power bi", "excel", "data visualization", "dashboards", "kpi", "business analytics", "reporting", "data warehousing"],
+        "Database Administrator": ["sql", "oracle", "mysql", "postgresql", "mongodb", "database design", "backup", "recovery", "performance tuning", "security", "indexing"],
+        "Prompt Engineer": ["python", "llm", "openai", "claude", "gemini", "prompt design", "few shot learning", "chain of thought", "api integration", "langchain"],
         
-        "Full Stack Developer": ["javascript", "react", "node.js", "python", "sql", "mongodb", "html", "css", "git", "api", "express", "typescript", "aws"],
+        # ☁️ CLOUD & INFRASTRUCTURE (5 roles)
+        "Cloud Engineer": ["aws", "azure", "gcp", "docker", "kubernetes", "terraform", "linux", "python", "ci/cd", "serverless", "lambda", "ec2", "s3", "vpc"],
+        "Cloud Architect": ["aws", "azure", "gcp", "cloud architecture", "microservices", "serverless", "security", "cost optimization", "scalability", "high availability", "disaster recovery"],
+        "Security Engineer": ["python", "linux", "network security", "penetration testing", "cloud security", "aws security", "incident response", "cryptography", "authentication", "owasp"],
+        "Cybersecurity Analyst": ["network security", "firewalls", "penetration testing", "risk assessment", "compliance", "siem", "incident response", "python", "linux", "vulnerability assessment", "nmap", "wireshark"],
+        "Network Engineer": ["cisco", "routing", "switching", "tcp/ip", "dns", "dhcp", "firewalls", "vpn", "load balancers", "network security", "ccna", "ccnp"],
         
-        "Cloud Engineer": ["aws", "azure", "gcp", "docker", "kubernetes", "terraform", "linux", "python", "ci/cd", "serverless", "lambda", "ec2", "s3"],
+        # 📈 PRODUCT & PROJECT MANAGEMENT (6 roles)
+        "Product Manager": ["agile", "scrum", "jira", "product strategy", "user stories", "roadmap", "stakeholder management", "analytics", "market research", "kpi", "user research"],
+        "Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "budgeting", "leadership", "communication", "pmp", "waterfall", "ms project", "stakeholder management"],
+        "Technical Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "python", "sql", "git", "stakeholder management", "technical documentation", "api", "cloud"],
+        "Product Owner": ["agile", "scrum", "product backlog", "user stories", "acceptance criteria", "stakeholder management", "jira", "confluence", "prioritization", "sprint planning"],
+        "Scrum Master": ["agile", "scrum", "jira", "sprint planning", "daily standup", "retrospective", "team facilitation", "conflict resolution", "continuous improvement", "servant leadership"],
+        "Business Analyst": ["requirements gathering", "agile", "scrum", "jira", "sql", "data analysis", "use cases", "stakeholder management", "documentation", "brd", "fr d", "uml", "visio"],
         
-        "Machine Learning Engineer": ["python", "tensorflow", "pytorch", "scikit-learn", "machine learning", "deep learning", "sql", "pandas", "numpy", "aws", "mlops", "docker"],
+        # 📢 MARKETING & DIGITAL (8 roles)
+        "Digital Marketing Manager": ["seo", "sem", "google analytics", "social media", "content marketing", "email marketing", "ppc", "marketing strategy", "facebook ads", "google ads", "hubspot"],
+        "Social Media Manager": ["instagram", "facebook", "twitter", "linkedin", "tiktok", "content creation", "social media strategy", "analytics", "engagement", "canva", "hootsuite", "buffer"],
+        "SEO Specialist": ["seo", "google analytics", "search console", "keyword research", "backlinks", "on page seo", "off page seo", "technical seo", "ahrefs", "semrush", "moz"],
+        "Content Marketer": ["content strategy", "blogging", "copywriting", "seo", "email marketing", "social media", "storytelling", "content creation", "wordpress", "analytics"],
+        "Email Marketing Specialist": ["email marketing", "mailchimp", "hubspot", "automation", "campaign management", "a/b testing", "analytics", "copywriting", "crm", "lead generation"],
+        "Growth Hacker": ["growth strategy", "a/b testing", "analytics", "seo", "social media", "email marketing", "conversion optimization", "data driven", "funnel optimization", "experimentation"],
+        "Brand Manager": ["brand strategy", "brand identity", "market research", "consumer insights", "campaign management", "social media", "analytics", "competitive analysis", "storytelling"],
+        "Public Relations Specialist": ["media relations", "press releases", "crisis communication", "storytelling", "content creation", "social media", "event planning", "brand reputation"],
         
-        "AI Engineer": ["python", "tensorflow", "pytorch", "machine learning", "deep learning", "nlp", "llm", "openai", "langchain", "rag", "vector databases"],
+        # 💼 SALES & BUSINESS DEVELOPMENT (6 roles)
+        "Sales Executive": ["sales", "negotiation", "crm", "lead generation", "business development", "communication", "salesforce", "cold calling", "account management", "closing", "forecasting"],
+        "Business Development Manager": ["business development", "sales", "negotiation", "partnerships", "lead generation", "market research", "strategic planning", "crm", "revenue growth"],
+        "Account Manager": ["client relationship", "account management", "customer success", "upselling", "cross selling", "communication", "crm", "salesforce", "retention", "renewals"],
+        "Sales Development Representative": ["cold calling", "lead generation", "prospecting", "salesforce", "crm", "communication", "qualification", "appointment setting", "outbound sales"],
+        "Customer Success Manager": ["customer success", "client relationship", "onboarding", "retention", "upselling", "support", "communication", "crm", "training", "feedback"],
+        "Channel Sales Manager": ["channel sales", "partners", "resellers", "indirect sales", "relationship management", "sales strategy", "negotiation", "forecasting", "crm"],
         
-        # Management Roles
-        "Product Manager": ["agile", "scrum", "jira", "product strategy", "user stories", "roadmap", "stakeholder management", "analytics", "market research", "kpi"],
+        # 👥 HUMAN RESOURCES (5 roles)
+        "HR Generalist": ["recruitment", "onboarding", "employee relations", "hr policies", "performance management", "training", "hrms", "labor laws", "benefits administration", "payroll"],
+        "Talent Acquisition Specialist": ["recruitment", "sourcing", "interviewing", "candidate screening", "ats", "linkedin recruiter", "employer branding", "offer negotiation", "onboarding"],
+        "HR Business Partner": ["hr strategy", "employee relations", "performance management", "talent management", "organizational development", "change management", "hr analytics", "leadership coaching"],
+        "Learning & Development Specialist": ["training", "learning management system", "instructional design", "curriculum development", "workshop facilitation", "e learning", "skill development", "training needs analysis"],
+        "Compensation & Benefits Analyst": ["compensation", "benefits", "salary benchmarking", "market analysis", "hr analytics", "excel", "data analysis", "rewards strategy", "total rewards"],
         
-        "Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "budgeting", "leadership", "communication", "pmp", "waterfall"],
+        # 💰 FINANCE & ACCOUNTING (6 roles)
+        "Financial Analyst": ["excel", "financial modeling", "accounting", "budgeting", "forecasting", "vba", "sql", "tableau", "financial reporting", "variance analysis", "valuation"],
+        "Investment Banker": ["financial modeling", "valuation", "due diligence", "mergers and acquisitions", "capital markets", "excel", "pitch books", "client management", "financial analysis"],
+        "Accountant": ["accounting", "gaap", "financial statements", "tax preparation", "audit", "quickbooks", "sap", "excel", "general ledger", "accounts payable", "accounts receivable"],
+        "Auditor": ["auditing", "accounting", "gaap", "risk assessment", "internal controls", "financial statements", "compliance", "data analysis", "excel", "audit software"],
+        "Tax Consultant": ["tax preparation", "tax planning", "tax compliance", "tax research", "accounting", "tax law", "excel", "tax software", "client advisory", "irs forms"],
+        "Credit Analyst": ["credit analysis", "financial analysis", "risk assessment", "financial statements", "credit risk", "underwriting", "excel", "loan analysis", "industry research"],
         
-        "Technical Project Manager": ["agile", "scrum", "jira", "project planning", "risk management", "python", "sql", "git", "stakeholder management", "technical documentation"],
+        # 🎨 DESIGN & CREATIVE (6 roles)
+        "Graphic Designer": ["photoshop", "illustrator", "indesign", "figma", "sketch", "adobe creative suite", "typography", "color theory", "branding", "logo design", "visual design"],
+        "UX/UI Designer": ["figma", "adobe xd", "sketch", "prototyping", "user research", "wireframing", "usability testing", "html", "css", "responsive design", "interaction design"],
+        "Product Designer": ["figma", "prototyping", "user research", "wireframing", "ui design", "ux design", "product thinking", "design systems", "user testing", "visual design"],
+        "Web Designer": ["html", "css", "javascript", "figma", "adobe xd", "responsive design", "wordpress", "ui design", "user experience", "visual design", "wireframing"],
+        "Motion Graphics Designer": ["after effects", "premiere pro", "animation", "motion graphics", "video editing", "cinema 4d", "photoshop", "illustrator", "storyboarding", "visual effects"],
+        "Video Editor": ["premiere pro", "final cut pro", "after effects", "video editing", "storytelling", "color grading", "audio editing", "motion graphics", "media management"],
         
-        # Marketing & Sales Roles
-        "Digital Marketing Manager": ["seo", "sem", "google analytics", "social media", "content marketing", "email marketing", "ppc", "marketing strategy", "facebook ads", "google ads"],
+        # 🏥 HEALTHCARE & MEDICAL (4 roles)
+        "Healthcare Administrator": ["healthcare management", "patient care", "medical records", "regulatory compliance", "budgeting", "staff management", "scheduling", "quality improvement"],
+        "Clinical Data Manager": ["clinical data", "data management", "sql", "excel", "clinical trials", "data validation", "medical terminology", "cdisc standards", "regulatory submissions"],
+        "Medical Writer": ["medical writing", "clinical research", "regulatory documents", "scientific writing", "medication reviews", "publications", "research papers", "medical terminology"],
+        "Health Informatics Specialist": ["health informatics", "ehr", "healthcare data", "sql", "data analysis", "clinical systems", "interoperability", "hl7", "health it", "analytics"],
         
-        "Social Media Manager": ["instagram", "facebook", "twitter", "linkedin", "content creation", "social media strategy", "analytics", "canva", "engagement"],
+        # 📚 EDUCATION & TRAINING (4 roles)
+        "Instructional Designer": ["instructional design", "curriculum development", "e learning", "lms", "training materials", "needs analysis", "assessment design", "storyboarding", "adult learning"],
+        "Teacher": ["lesson planning", "classroom management", "curriculum development", "student assessment", "parent communication", "differentiated instruction", "educational technology"],
+        "Academic Counselor": ["student advising", "academic planning", "career counseling", "student support", "communication", "record keeping", "workshop facilitation", "crisis intervention"],
+        "Corporate Trainer": ["training delivery", "workshop facilitation", "curriculum development", "needs assessment", "presentation skills", "employee development", "lms", "e learning"],
         
-        "Sales Executive": ["sales", "negotiation", "crm", "lead generation", "business development", "communication", "salesforce", "cold calling", "account management"],
-        
-        # HR & Finance Roles
-        "HR Generalist": ["recruitment", "onboarding", "employee relations", "hr policies", "performance management", "training", "hrms", "labor laws", "benefits administration"],
-        
-        "Financial Analyst": ["excel", "financial modeling", "accounting", "budgeting", "forecasting", "vba", "sql", "tableau", "financial reporting", "variance analysis"],
-        
-        "Business Analyst": ["requirements gathering", "agile", "scrum", "jira", "sql", "data analysis", "use cases", "stakeholder management", "documentation", "brd"],
-        
-        # Design Roles
-        "Graphic Designer": ["photoshop", "illustrator", "indesign", "figma", "sketch", "adobe creative suite", "typography", "color theory", "branding", "logo design"],
-        
-        "UX/UI Designer": ["figma", "adobe xd", "sketch", "prototyping", "user research", "wireframing", "usability testing", "html", "css", "responsive design"],
-        
-        "Product Designer": ["figma", "prototyping", "user research", "wireframing", "ui design", "ux design", "design systems", "visual design", "interaction design"],
-        
-        # Security Roles
-        "Cybersecurity Analyst": ["network security", "firewalls", "penetration testing", "risk assessment", "compliance", "siem", "incident response", "python", "linux", "vulnerability assessment"],
-        
-        "Security Engineer": ["python", "linux", "network security", "penetration testing", "cloud security", "aws security", "incident response", "cryptography", "authentication"]
+        # 🔧 OTHER PROFESSIONAL ROLES (5 roles)
+        "Operations Manager": ["operations management", "process improvement", "team leadership", "budgeting", "supply chain", "logistics", "kpi tracking", "resource allocation", "strategic planning"],
+        "Supply Chain Manager": ["supply chain", "logistics", "inventory management", "procurement", "vendor management", "forecasting", "warehouse operations", "transportation", "erp systems"],
+        "Legal Associate": ["legal research", "document drafting", "case management", "client communication", "contract review", "litigation support", "corporate law", "compliance", "negotiation"],
+        "Research Analyst": ["research methodology", "data analysis", "statistics", "qualitative research", "quantitative research", "report writing", "survey design", "literature review", "presentation"],
+        "Executive Assistant": ["calendar management", "travel coordination", "meeting planning", "communication", "document preparation", "project coordination", "office management", "confidentiality"]
     }
     
-    # Get keywords for selected role (default to Software Engineer if not found)
+    # Get keywords for selected role
     keywords = role_keywords.get(job_role, role_keywords["Software Engineer"])
     
     # Find present and missing skills
@@ -212,47 +253,60 @@ def analyze_specific_resume(resume_text, job_role):
 
 # ========== MAIN APP UI ==========
 st.title("🧠 AI Resume Analyzer")
-st.markdown("*Real analysis of YOUR specific resume - not generic templates*")
+st.markdown("*Real analysis of YOUR specific resume - 50+ job roles supported!*")
 
 with st.sidebar:
     st.header("⚙️ Settings")
     
-    # FULL dropdown with all 25+ roles
+    # FULL dropdown with 50+ roles across 10 categories
     job_role = st.selectbox("Select Target Job Role:", [
-        "━━━━━ 👨‍💻 TECH ROLES ━━━━━",
-        "Software Engineer", 
-        "Data Analyst", 
-        "Web Developer",
-        "Data Scientist",
-        "DevOps Engineer",
-        "Frontend Developer",
-        "Backend Developer",
-        "Full Stack Developer",
-        "Cloud Engineer",
-        "Machine Learning Engineer",
-        "AI Engineer",
-        "━━━━━ 📊 MANAGEMENT ━━━━━",
-        "Product Manager",
-        "Project Manager",
-        "Technical Project Manager",
-        "━━━━━ 📈 MARKETING & SALES ━━━━━",
-        "Digital Marketing Manager",
-        "Social Media Manager",
-        "Sales Executive",
-        "━━━━━ 👥 HR & FINANCE ━━━━━",
-        "HR Generalist",
-        "Financial Analyst",
-        "Business Analyst",
-        "━━━━━ 🎨 DESIGN ━━━━━",
-        "Graphic Designer",
-        "UX/UI Designer",
-        "Product Designer",
-        "━━━━━ 🔒 SECURITY ━━━━━",
-        "Cybersecurity Analyst",
-        "Security Engineer"
+        "━━━━━ 👨‍💻 SOFTWARE DEVELOPMENT ━━━━━",
+        "Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer",
+        "Mobile Developer", "Game Developer", "Embedded Engineer", "DevOps Engineer",
+        "Site Reliability Engineer", "Quality Assurance Engineer",
+        
+        "━━━━━ 📊 DATA & AI ━━━━━",
+        "Data Analyst", "Data Scientist", "Machine Learning Engineer", "AI Engineer",
+        "Data Engineer", "Business Intelligence Analyst", "Database Administrator", "Prompt Engineer",
+        
+        "━━━━━ ☁️ CLOUD & INFRASTRUCTURE ━━━━━",
+        "Cloud Engineer", "Cloud Architect", "Security Engineer", "Cybersecurity Analyst", "Network Engineer",
+        
+        "━━━━━ 📈 PRODUCT & PROJECT MANAGEMENT ━━━━━",
+        "Product Manager", "Project Manager", "Technical Project Manager", "Product Owner",
+        "Scrum Master", "Business Analyst",
+        
+        "━━━━━ 📢 MARKETING & DIGITAL ━━━━━",
+        "Digital Marketing Manager", "Social Media Manager", "SEO Specialist", "Content Marketer",
+        "Email Marketing Specialist", "Growth Hacker", "Brand Manager", "Public Relations Specialist",
+        
+        "━━━━━ 💼 SALES & BUSINESS DEVELOPMENT ━━━━━",
+        "Sales Executive", "Business Development Manager", "Account Manager", "Sales Development Representative",
+        "Customer Success Manager", "Channel Sales Manager",
+        
+        "━━━━━ 👥 HUMAN RESOURCES ━━━━━",
+        "HR Generalist", "Talent Acquisition Specialist", "HR Business Partner",
+        "Learning & Development Specialist", "Compensation & Benefits Analyst",
+        
+        "━━━━━ 💰 FINANCE & ACCOUNTING ━━━━━",
+        "Financial Analyst", "Investment Banker", "Accountant", "Auditor", "Tax Consultant", "Credit Analyst",
+        
+        "━━━━━ 🎨 DESIGN & CREATIVE ━━━━━",
+        "Graphic Designer", "UX/UI Designer", "Product Designer", "Web Designer",
+        "Motion Graphics Designer", "Video Editor",
+        
+        "━━━━━ 🏥 HEALTHCARE ━━━━━",
+        "Healthcare Administrator", "Clinical Data Manager", "Medical Writer", "Health Informatics Specialist",
+        
+        "━━━━━ 📚 EDUCATION ━━━━━",
+        "Instructional Designer", "Teacher", "Academic Counselor", "Corporate Trainer",
+        
+        "━━━━━ 🔧 OTHER PROFESSIONAL ROLES ━━━━━",
+        "Operations Manager", "Supply Chain Manager", "Legal Associate", "Research Analyst", "Executive Assistant"
     ])
     
     st.markdown("---")
+    st.markdown(f"**📊 Currently supporting 50+ job roles**")
     st.markdown("### What gets analyzed:")
     st.markdown("✓ Technical skills (role-specific)")
     st.markdown("✓ Resume sections")
@@ -319,20 +373,20 @@ if uploaded_file is not None:
             # Detailed analysis expander
             with st.expander("🔍 View Detailed Analysis"):
                 if analysis['found_skills']:
-                    st.subheader("Skills Found")
+                    st.subheader("✅ Skills Found")
                     st.write(", ".join(analysis['found_skills'][:15]))
                 
                 if analysis['missing_skills']:
-                    st.subheader("Missing Skills")
+                    st.subheader("❌ Missing Skills")
                     st.write(", ".join(analysis['missing_skills'][:10]))
                 
-                st.subheader("Sections Found")
+                st.subheader("📑 Sections Found")
                 st.write(", ".join(analysis['sections_detected']) if analysis['sections_detected'] else "None detected")
                 
-                st.subheader("Action Verbs Found")
+                st.subheader("💪 Action Verbs Found")
                 st.write(", ".join(analysis['found_action_verbs'][:10]) if analysis['found_action_verbs'] else "None")
                 
-                st.subheader("Contact Info")
+                st.subheader("📞 Contact Info")
                 st.write(f"Email: {'✓' if analysis['has_email'] else '✗'}")
                 st.write(f"Phone: {'✓' if analysis['has_phone'] else '✗'}")
                 st.write(f"LinkedIn: {'✓' if analysis['has_linkedin'] else '✗'}")
@@ -375,11 +429,19 @@ else:
     
     with st.expander("📖 How it works"):
         st.markdown("""
-        1. Upload your resume (PDF or DOCX)
-        2. Select your target job role
-        3. Get instant score and analysis
-        4. Download detailed report
+        **1. Upload your resume** (PDF or DOCX)
+        
+        **2. Select your target job role** from 50+ options
+        
+        **3. Get instant analysis:**
+        - Score out of 100
+        - Found vs missing skills
+        - Section detection
+        - Action verb analysis
+        - Personalized suggestions
+        
+        **4. Download detailed report**
         """)
 
 st.markdown("---")
-st.caption("AI Resume Analyzer | Analyze, Optimize, Succeed 🚀")
+st.caption("🚀 AI Resume Analyzer | 50+ Job Roles | Analyze, Optimize, Succeed")
