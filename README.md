@@ -1,6 +1,5 @@
 ---
 title: AI Resume Analyzer
-emoji: 🧠
 colorFrom: purple
 colorTo: blue
 sdk: streamlit
@@ -9,7 +8,7 @@ app_file: resume_app.py
 pinned: false
 ---
 
-# 🧠 AI Resume Analyzer
+# AI Resume Analyzer
 
 Analyze your resume against 50+ job roles. Get score, missing skills, and personalized suggestions.
 
@@ -19,11 +18,11 @@ Analyze your resume against 50+ job roles. Get score, missing skills, and person
 3. Get instant analysis
 
 ## Features:
-- ✅ 50+ job roles + Custom role option
-- ✅ Score out of 100
-- ✅ Missing skills detection
-- ✅ ATS compatibility check
-- ✅ Downloadable report
+-  50+ job roles + Custom role option
+-  Score out of 100
+-  Missing skills detection
+-  ATS compatibility check
+-  Downloadable report
 
 ## Built with:
 - Python
