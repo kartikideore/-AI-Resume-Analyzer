@@ -8,7 +8,7 @@ app_file: resume_app.py
 pinned: false
 ---
 
-# AI Resume Analyzer
+# resume tracker by ai
 
 Analyze your resume against 50+ job roles. Get score, missing skills, and personalized suggestions.
 
