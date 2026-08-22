@@ -1,5 +1,5 @@
 ---
-title: AI Resume Analyzer
+title: resume tracker by ai
 colorFrom: purple
 colorTo: blue
 sdk: streamlit
