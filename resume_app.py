@@ -3,7 +3,7 @@ import pdfplumber
 from docx import Document
 import re
 
-st.set_page_config(page_title="AI Resume Analyzer", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="resume tracker by ai", page_icon="🧠", layout="wide")
 
 # ========== TEXT EXTRACTION ==========
 def extract_text_from_pdf(file):
